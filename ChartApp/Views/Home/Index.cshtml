@@ -1,0 +1,92 @@
+﻿@model IEnumerable<ChartApp.Models.ProductModel>
+<div class="text-center">
+    <h2 class="display-4">Chart .Net Core MVC</h2>
+</div>
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.CodeProduct)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Price)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CodeProduct)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button type="button" onclick="generateChart()" class="btn btn-primary">Generate Chart</button>
+    <div  style="width:50%;height:50%; text-align:center">
+        <canvas id="myChart"> </canvas>
+    </div>
+</div>
+@section Scripts {
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        async function generateChart() {
+            //canvas to draw the chart
+            var myChart = document.getElementById('myChart').getContext('2d');
+
+            //fetch data json
+            try {
+                let response = await fetch('/Home/GenerateChart');
+                let products = await response.json();
+                var labels = [];
+                var datasets = []
+                products.forEach(element => {
+                    datasets.push(element.price)
+                    labels.push(element.name)
+                });
+                //instance chart 
+                new Chart(myChart, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: "Products Price",
+                                backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f"],
+                                data: datasets
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Chart.js .Net Core'
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+    </script>
+}
